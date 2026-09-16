@@ -1,4 +1,4 @@
-# SecureExams Cloud 🛡️
+# SecureExams Cloud 
 ### Secure Cloud-Based Question Paper Management & Zero-Leak Controlled Release System
 
 ---
@@ -57,12 +57,7 @@ SecureExams Cloud eliminates single-point compromise through defense-in-depth se
    ```bash
    cp .env.example .env
    ```
-   If connecting to your Supabase PostgreSQL project:
-   ```env
-   VITE_SUPABASE_URL="https://your-project.supabase.co"
-   VITE_SUPABASE_ANON_KEY="your-anon-public-key"
-   ```
-   *(If omitted, the app will run in local high-fidelity simulation mode automatically).*
+ 
 
 4. **Run the Development Server**:
    ```bash
@@ -113,8 +108,8 @@ SecureExams Cloud eliminates single-point compromise through defense-in-depth se
         ├── SetterDashboard.tsx          # Blinded question submission station & AES-256 Cloud Vault Inspector
         ├── ControllerDashboard.tsx      # Multi-shard pool health & automated paper synthesis engine
         ├── QuorumApprovalPanel.tsx      # Dual-officer digital certificate co-signing terminal
-        ├── IntegrityVerificationModal.tsx# Real-time SHA-256 hash comparison & attack simulation
-        ├── SuperintendentReleaseStation.tsx # Time-lock countdown, KMS key release & watermarked viewer
+        ├── IntegrityVerification.tsx    # Real-time SHA-256 hash comparison & attack simulation
+        ├── SuperintendentRelease.tsx    # Time-lock countdown, KMS key release & watermarked viewer
         ├── SecurityAuditViewer.tsx      # Immutable forensic activity log table with search & JSON export
         ├── SystemOverviewModal.tsx      # Comprehensive threat model and mitigation architecture specifications
         └── SupabaseSetupModal.tsx       # Interactive Supabase connection helper & 1-click SQL copy modal
