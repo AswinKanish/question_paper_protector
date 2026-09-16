@@ -1,0 +1,7 @@
+{
+  "name": "SecureExams Cloud - Question Paper Security System",
+  "description": "Secure cloud-based question paper management system with 2FA, blinded question setting, automated assembly, cryptographic integrity verification, multi-officer approval, and time-locked release.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
