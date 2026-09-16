@@ -43,6 +43,16 @@ import { IntegrityVerificationModal } from './components/IntegrityVerificationMo
 import { SuperintendentReleaseStation } from './components/SuperintendentReleaseStation';
 import { SecurityAuditViewer } from './components/SecurityAuditViewer';
 import { SystemOverviewModal } from './components/SystemOverviewModal';
+import { SupabaseSetupModal } from './components/SupabaseSetupModal';
+import {
+  isSupabaseConfigured,
+  fetchQuestionsFromSupabase,
+  saveQuestionToSupabase,
+  fetchPaperFromSupabase,
+  savePaperToSupabase,
+  fetchAuditLogsFromSupabase,
+  logAuditToSupabase,
+} from './lib/supabase';
 
 export default function App() {
   // Authentication & Users State
@@ -64,6 +74,31 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isIntegrityModalOpen, setIsIntegrityModalOpen] = useState<boolean>(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
+
+  // Initial Supabase Sync on Mount
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      (async () => {
+        try {
+          const remoteQuestions = await fetchQuestionsFromSupabase();
+          if (remoteQuestions && remoteQuestions.length > 0) {
+            setQuestionVault(remoteQuestions);
+          }
+          const remotePaper = await fetchPaperFromSupabase();
+          if (remotePaper) {
+            setPaper(remotePaper);
+          }
+          const remoteLogs = await fetchAuditLogsFromSupabase();
+          if (remoteLogs && remoteLogs.length > 0) {
+            setAuditLogs(remoteLogs);
+          }
+        } catch (err) {
+          console.warn('Initial Supabase sync fallback to local cache:', err);
+        }
+      })();
+    }
+  }, []);
 
   // Clock countdown ticker
   useEffect(() => {
@@ -98,6 +133,13 @@ export default function App() {
       cryptoProof,
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    // Asynchronously record to Supabase if configured
+    if (isSupabaseConfigured) {
+      logAuditToSupabase(newLog).catch((err) =>
+        console.warn('Supabase log async error:', err)
+      );
+    }
   };
 
   // Switch User Profile (Fast Switch or via 2FA Modal)
@@ -131,6 +173,11 @@ export default function App() {
   // Add Question by Setter
   const handleAddQuestion = (newQuestion: QuestionItem) => {
     setQuestionVault((prev) => [...prev, newQuestion]);
+    if (isSupabaseConfigured) {
+      saveQuestionToSupabase(newQuestion).catch((err) =>
+        console.warn('Supabase save question error:', err)
+      );
+    }
     logSecurityEvent(
       'BLIND_QUESTION_SETTING',
       'Encrypted Shard Question Stored',
@@ -198,6 +245,12 @@ export default function App() {
     setPaper(newPaper);
     setIsDecrypted(false);
 
+    if (isSupabaseConfigured) {
+      savePaperToSupabase(newPaper).catch((err) =>
+        console.warn('Supabase save paper error:', err)
+      );
+    }
+
     logSecurityEvent(
       'AUTOMATED_ASSEMBLY',
       'Automated Paper Assembly Executed',
@@ -217,6 +270,16 @@ export default function App() {
       signatures: updatedSignatures,
       status: isQuorumReached ? 'APPROVED_LOCKED' : 'PENDING_QUORUM',
     }));
+
+    if (isSupabaseConfigured) {
+      savePaperToSupabase({
+        ...paper,
+        signatures: updatedSignatures,
+        status: isQuorumReached ? 'APPROVED_LOCKED' : 'PENDING_QUORUM',
+      }).catch((err) =>
+        console.warn('Supabase update paper signatures error:', err)
+      );
+    }
 
     logSecurityEvent(
       'QUORUM_APPROVAL',
@@ -381,6 +444,7 @@ export default function App() {
         onLogout={() => setIsAuthModalOpen(true)}
         onOpenInfoModal={() => setIsInfoModalOpen(true)}
         onOpenIntegrityModal={() => setIsIntegrityModalOpen(true)}
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         paper={paper}
         timeRemainingSeconds={timeRemainingSeconds}
         isTimeLockExpired={isTimeLockExpired}
@@ -606,6 +670,11 @@ export default function App() {
       <SystemOverviewModal
         isOpen={isInfoModalOpen}
         onClose={() => setIsInfoModalOpen(false)}
+      />
+
+      <SupabaseSetupModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
       />
     </div>
   );

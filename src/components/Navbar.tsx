@@ -10,8 +10,10 @@ import {
   LogOut,
   Info,
   ChevronDown,
+  Database,
 } from 'lucide-react';
 import { User, AssembledPaper, UserRole } from '../types';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 interface NavbarProps {
   currentUser: User;
@@ -20,6 +22,7 @@ interface NavbarProps {
   onLogout: () => void;
   onOpenInfoModal: () => void;
   onOpenIntegrityModal: () => void;
+  onOpenSupabaseModal: () => void;
   paper: AssembledPaper;
   timeRemainingSeconds: number;
   isTimeLockExpired: boolean;
@@ -33,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   onOpenInfoModal,
   onOpenIntegrityModal,
+  onOpenSupabaseModal,
   paper,
   timeRemainingSeconds,
   isTimeLockExpired,
@@ -121,6 +125,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
               <span>Release: {formatTime(timeRemainingSeconds)}</span>
             </div>
+
+            {/* Supabase Status Indicator & Setup Guide */}
+            <button
+              id="nav-btn-supabase-status"
+              onClick={onOpenSupabaseModal}
+              className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md border font-mono transition-all ${
+                isSupabaseConfigured
+                  ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/80'
+                  : 'bg-slate-900 border-amber-600/50 text-amber-300 hover:bg-slate-850'
+              }`}
+              title="Click to check Supabase configuration and database instructions"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span className="font-medium">
+                {isSupabaseConfigured ? 'Supabase: Connected' : 'Supabase: Setup'}
+              </span>
+            </button>
 
             {/* Threat Model Explanation Modal Trigger */}
             <button
